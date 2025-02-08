@@ -1,0 +1,41 @@
+services:
+  ros2_humble:
+    image: osrf/ros:humble-desktop-full
+    container_name: ros2_humble_dev
+    privileged: true
+    environment:
+      # Display forwarding for Windows using VcXsrv
+      - DISPLAY=host.docker.internal:0.0
+      # OpenGL configuration for X11 forwarding
+      - LIBGL_ALWAYS_INDIRECT=1
+      # QT configurations
+      - QT_X11_NO_MITSHM=1
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=all
+    # Add NVIDIA runtime configuration
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    volumes:
+      - ros2_workspace:/home/ros2_ws
+      - /tmp/.X11-unix:/tmp/.X11-unix
+    network_mode: bridge
+    working_dir: /home/ros2_ws
+    tty: true
+    stdin_open: true
+    restart: unless-stopped
+    command: >
+      bash -c "
+      if [ ! -d /home/ros2_ws/src ]; then
+        mkdir -p /home/ros2_ws/src &&
+        cd /home/ros2_ws &&
+        colcon build
+      fi &&
+      bash"
+
+volumes:
+  ros2_workspace:
