@@ -11,6 +11,8 @@ services:
       - USER=${USER}
       - UID=${UID}
       - GID=${GID}
+      - XAUTHORITY=/tmp/.Xauthority
+    user: "${UID}:${GID}"
     volumes:
       # Mount your ROS workspace
       - ~/ros2_ws:/home/ros2_ws
@@ -18,6 +20,8 @@ services:
       - /dev:/dev
       # Forward the host's X11 socket for GUI applications
       - /tmp/.X11-unix:/tmp/.X11-unix
+      # SECURE X11 AUTH: Mount the XAuthority file from the host
+      - ~/.Xauthority:/tmp/.Xauthority:ro
     network_mode: host
     working_dir: /home/ros2_ws
     tty: true
